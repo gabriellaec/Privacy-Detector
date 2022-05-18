@@ -1,0 +1,20 @@
+{
+    "browser_action": {
+      "browser_style": true,
+      "default_title": "Privacy Detector",
+      "default_popup": "privacy_detector.html",
+      "default_icon": {
+        "19": "icons/icon-48.png",
+        "38": "icons/icon-96.png"
+      }
+    },
+    "description": "List cookies in the active tab.",
+    "icons": {
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png"
+    },
+    "manifest_version": 2,
+    "name": "List cookies",
+    "version": "1.0",
+    "permissions": ["cookies","<all_urls>","tabs"]
+  }
