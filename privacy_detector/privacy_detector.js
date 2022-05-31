@@ -1,47 +1,27 @@
+// ------------------------------------------------------//
+// ---------------------- Cookies ---------------------- //
+// ------------------------------------------------------//
+// https://github.com/mdn/webextensions-examples/blob/master/list-cookies/cookies.js
+
 function showCookiesForTab(tabs) {
-    //get the first tab object in the array
     let tab = tabs.pop();
   
-    //get all cookies in the domain
-    var gettingAllCookies = browser.cookies.getAll({url: null});
+    var gettingAllCookies = browser.cookies.getAll({});
     gettingAllCookies.then((cookies) => {
   
-      //set the header of the panel
       var activeTabUrl = document.getElementById('header-title');
-      var text = document.createTextNode("Cookies at: "+tab.title);
-      var cookieList = document.getElementById('cookie-list');
+      var text = document.createTextNode(tab.title);
       var cookieStats = document.getElementById('cookie-stats');
       activeTabUrl.appendChild(text);
-
 
       var total_cookies = 0;
       var session_cookies = 0;
       var persistent_cookies = 0;
       var first_party_cookies = 0;
       var third_party_cookies = 0;
-
-
   
       if (cookies.length > 0) {
-        //add an <li> item with the name and value of the cookie to the list
         for (let cookie of cookies) {
-          // let li = document.createElement("li");
-          // let content = document.createTextNode(
-            // "Name: "+cookie.name + 
-          // "   | Value: "+ cookie.value + 
-          // "   | Domain: "+ cookie.domain + 
-          // "   | firstPartyDomain: "+ cookie.firstPartyDomain + 
-          // "   | partitionKey: "+ cookie.partitionKey +
-          // "   | topLevelSite: "+ cookie.topLevelSite + "   \nPath: "+ cookie.path + 
-          // "   | secure: "+ cookie.secure  + 
-          // "   | nsession: "+ cookie.session + 
-          // "   | storeId: "+ cookie.storeId  + 
-          // "   | url: "+ cookie.url +
-          // "   | exp : " + cookie.expirationDate);
-
-          // li.appendChild(content);
-          // cookieList.appendChild(li);
-
 
           if ((tab.url).includes(cookie.domain)){
             first_party_cookies++;
@@ -69,7 +49,7 @@ function showCookiesForTab(tabs) {
 
         );
 
-        cookieList.appendChild(content_stats);
+        cookieStats.appendChild(content_stats);
 
       } else {
         let p = document.createElement("p");
@@ -81,10 +61,69 @@ function showCookiesForTab(tabs) {
       }
     });
   }
+
+
+  function html5Storage(tabs) {
+    let tab = tabs.pop();
+    var storage = document.getElementById('html5');
+
+  //   for (var a in localStorage) {
+  //     console.log(a, ' = ', localStorage[a]);
+  //  }
+
+   var localStorage = window.content.localStorage;
+
+    // var keys = Object.keys(localStorage);
+    // console.log(String(keys));
+
+    // var i = keys.length;
+    // console.log(String(i));
+
+    // while ( i-- ) {
+
+      
+    //   console.log(localStorage.getItem( String(keys[i]) ));
+      
+    //   let li = document.createElement("li");
+    //   let content = document.createTextNode(
+    //     String(localStorage.getItem(String(keys[i])))
+    //   );
+    //   li.appendChild(content);
+    //   storage.appendChild(li);
+    // }
+
+    // print(i);
+
+    function onGot(item) {
+      console.log(item.valueOf());
+    }
+    
+    function onError(error) {
+      console.log(`Error: ${error}`);
+    }
+    
+    let gettingItem = browser.storage.local.get();
+    gettingItem.then(onGot, onError);
+    console.log(tab.method);
+    console.log(JSON.stringify(browser.storage.local.get()));
+ }
+
+
+ function externalConnections(tabs) {
+  let tab = tabs.pop();
+  var urls = [];
+  console.log(JSON.stringify(document.querySelectorAll("div")));
+  for(var i = document.links.length; i --> 0;)
+    if(document.links[i].hostname === location.hostname){
+        urls.push(document.links[i].href);
+        console.log(document.links[i].href);
+    }
+ }
   
-  //get active tab to run an callback function.
-  //it sends to our callback an array of tab objects
   function getActiveTab() {
     return browser.tabs.query({currentWindow: true, active: true});
   }
-  getActiveTab().then(showCookiesForTab);
+  getActiveTab().then(showCookiesForTab)
+  getActiveTab().then(html5Storage);
+
+
