@@ -1,11 +1,104 @@
-html, body {
-    width: 500px;
-  }
+
+
+ body, html {
+  width: 500px;
+  
+  background-image: url("background/img13.jpg");
+  /* 5, 12, 13 */ 
+
+}
+
+
+#myPanel{
+  background-image: url("background/img10.jpg"); 
+
+}
+ 
+.panel-section .panel-section-header{
+  background-color: white;
+ }
+
+
   
   .panel {
     padding: 5px;
+    
+
   }
   
   li {
     margin-bottom: 5px;
   }
+
+
+  #Bar progress[value]::-moz-progress-bar { 
+    background-image:
+      -moz-linear-gradient(
+        135deg, 
+        transparent 33%, 
+        rgba(0, 0, 0, 0.1) 33%, 
+        rgba(0, 0, 0, 0.1) 66%, 
+        transparent 66% 
+      ),
+      -moz-linear-gradient(
+        top, 
+        rgba(255, 255, 255, 0.25), 
+        rgba(0, 0, 0, 0.25)
+      ),
+      -moz-linear-gradient(
+        left, 
+        #09c, 
+        #f44
+      );
+  
+    border-radius: 2px; 
+    background-size: 35px 20px, 100% 100%, 100% 100%; 
+    
+  }
+
+
+  #Bar{
+
+    font-size: large;
+    font: small-caps bold 24px/1 sans-serif;
+  
+  }
+
+  #myProgress{
+    background:white;
+    padding: 20px;
+
+    margin-top: 10px;
+    /* margin-left: 100px;
+    margin-right: 145px; */
+  }
+
+  #cookie-stats{
+    
+    list-style: inside;
+background-color: white;
+    padding: 20px;
+  }
+
+  #cookie-stats {
+    
+    font-size: large;
+  }
+
+  #cookie-stats li {
+    background: #ffe5e5;
+    color: darkred;
+    padding: 5px;
+    margin-left: 35px;
+    font-size: small;
+  }
+  
+
+  /*  Referências
+
+  * https://www.w3schools.com/css/tryit.asp?filename=trycss_list-style_colors 
+
+  * https://css-tricks.com/html5-progress-element/ 
+  
+  
+  */

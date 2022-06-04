@@ -1,12 +1,20 @@
-// ------------------------------------------------------//
-// ---------------------- Cookies ---------------------- //
-// ------------------------------------------------------//
+// ---------------------------------------------------------------//
+// ---------------------- Privacy Detector ---------------------- //
+// --------------------------------------------------------------//
+
+
+
+
 // https://github.com/mdn/webextensions-examples/blob/master/list-cookies/cookies.js
 
-function showCookiesForTab(tabs) {
+function showTabInfo(tabs) {
     let tab = tabs.pop();
+
+    var risk_score =0;
+
   
-    var gettingAllCookies = browser.cookies.getAll({});
+// -------------- Cookies -------------- //
+    var gettingAllCookies = browser.cookies.getAll({url: tab.url});
     gettingAllCookies.then((cookies) => {
   
       var activeTabUrl = document.getElementById('header-title');
@@ -30,36 +38,83 @@ function showCookiesForTab(tabs) {
           }
 
           if(String(cookie.expirationDate)!=("undefined")){
-
             persistent_cookies++;
           }else{
             session_cookies++;
-          }
 
+          }
           total_cookies++;
-          
         }
 
-        let content_stats = document.createTextNode(
-          "Total Cookies: " + total_cookies +
-          " | First Party Cookies: " + first_party_cookies +
-          " | Third Party Cookies: " + third_party_cookies +
-          " | Persistent Cookies: " + persistent_cookies +
-          " | Session Cookies: " + session_cookies
+        var ul = document.getElementById('cookie-stats');
+        var li1 = document.createElement("li");
+        var li2= document.createElement("li");
+        var li3 = document.createElement("li");
+        var li4 = document.createElement("li");
+        var li5 = document.createElement("li");
 
-        );
+        let content_stats = document.createTextNode("Total Cookies: " + total_cookies + "\n");
+        let content_Third = document.createTextNode( "Third Party Cookies: " + third_party_cookies );
+        let content_first = document.createTextNode("First Party Cookies: " + first_party_cookies);
+        let content_Persistent = document.createTextNode("Persistent Cookies: " + persistent_cookies );
+        let content_Session = document.createTextNode("Session Cookies: " + session_cookies);
+        
+        li1.appendChild(content_stats);
+        li2.appendChild(content_first);
+        li3.appendChild(content_Third);
+        li4.appendChild(content_Persistent);
+        li5.appendChild(content_Session);
 
-        cookieStats.appendChild(content_stats);
 
+        ul.appendChild(content_stats);
+        ul.appendChild(li2);
+        ul.appendChild(li3);
+        ul.appendChild(li4);
+        ul.appendChild(li5);
+        
       } else {
-        let p = document.createElement("p");
-        let content = document.createTextNode("No cookies in this tab.");
-        let parent = cookieList.parentNode;
-  
-        p.appendChild(content);
-        parent.appendChild(p);
+        let content_stats = document.createTextNode("No cookies in this tab!");
+        cookieStats.appendChild(content_stats);
       }
-    });
+
+      risk_score+=2*persistent_cookies;
+      risk_score+=2*session_cookies;
+
+          
+        // -------------- Score -------------- //
+        var g = document.createElement("progress");
+        g.setAttribute("value", risk_score.toString());
+        g.setAttribute("max", "100");
+
+        let content = document.createTextNode(risk_score.toString()+"   ");
+        document.getElementById("Bar").appendChild(content);
+        document.getElementById("Bar").appendChild(g);
+
+
+
+
+        function onGot(item) {
+          console.log(item.valueOf());
+          var storage = document.getElementById('html5');
+          let storage_log = document.createTextNode(JSON.stringify(browser.storage.local.get()));
+          storage.appendChild(storage_log);
+        }
+        
+        function onError(error) {
+          console.log(`Error: ${error}`);
+        }
+        
+        let gettingItem = browser.storage.local.get();
+        gettingItem.then(onGot, onError);
+        console.log(tab.method);
+        console.log(JSON.stringify(browser.storage.local.get()));
+
+        
+
+    }); 
+    
+
+
   }
 
 
@@ -106,6 +161,8 @@ function showCookiesForTab(tabs) {
     gettingItem.then(onGot, onError);
     console.log(tab.method);
     console.log(JSON.stringify(browser.storage.local.get()));
+
+
  }
 
 
@@ -119,11 +176,20 @@ function showCookiesForTab(tabs) {
         console.log(document.links[i].href);
     }
  }
+
+// https://www.geeksforgeeks.org/how-to-set-get-the-value-of-progress-bar-using-javascript/
+ function setScoreBar(risk_score) {
+  
+  var g = document.createElement("progress");
+  g.setAttribute("value", risk_score.toString());
+  g.setAttribute("max", "100");
+  
+  let content = document.createTextNode(risk_score.toString()+"   ");
+  document.getElementById("Bar").appendChild(content);
+  document.getElementById("Bar").appendChild(g);
+} 
   
   function getActiveTab() {
     return browser.tabs.query({currentWindow: true, active: true});
   }
-  getActiveTab().then(showCookiesForTab)
-  getActiveTab().then(html5Storage);
-
-
+  getActiveTab().then(showTabInfo)
