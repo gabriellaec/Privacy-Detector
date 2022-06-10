@@ -3,9 +3,15 @@
 // --------------------------------------------------------------//
 
 
+requests = [];
 
-
-// https://github.com/mdn/webextensions-examples/blob/master/list-cookies/cookies.js
+function logURL(tab) {
+  // console.log(tab.url);
+  // count +=1;
+  // console.log(count);
+  requests.push(tab.url);
+  // return requests;
+}
 
 function showTabInfo(tabs) {
     let tab = tabs.pop();
@@ -90,80 +96,22 @@ function showTabInfo(tabs) {
         document.getElementById("Bar").appendChild(content);
         document.getElementById("Bar").appendChild(g);
 
+// ---------------------------------------------------------- //
+      var count = 0;
+      var gettingRequests = browser.webRequest.onBeforeRequest.addListener(
+          logURL,
+          {urls: ["<all_urls>"]}
+        );
+        console.log(requests);
 
-
-
-        function onGot(item) {
-          console.log(item.valueOf());
-          var storage = document.getElementById('html5');
-          let storage_log = document.createTextNode(JSON.stringify(browser.storage.local.get()));
-          storage.appendChild(storage_log);
-        }
-        
-        function onError(error) {
-          console.log(`Error: ${error}`);
-        }
-        
-        let gettingItem = browser.storage.local.get();
-        gettingItem.then(onGot, onError);
-        console.log(tab.method);
-        console.log(JSON.stringify(browser.storage.local.get()));
-
-        
 
     }); 
+    console.log(requests);
     
+// ----------------------------------------------------------------------
 
 
   }
-
-
-  function html5Storage(tabs) {
-    let tab = tabs.pop();
-    var storage = document.getElementById('html5');
-
-  //   for (var a in localStorage) {
-  //     console.log(a, ' = ', localStorage[a]);
-  //  }
-
-   var localStorage = window.content.localStorage;
-
-    // var keys = Object.keys(localStorage);
-    // console.log(String(keys));
-
-    // var i = keys.length;
-    // console.log(String(i));
-
-    // while ( i-- ) {
-
-      
-    //   console.log(localStorage.getItem( String(keys[i]) ));
-      
-    //   let li = document.createElement("li");
-    //   let content = document.createTextNode(
-    //     String(localStorage.getItem(String(keys[i])))
-    //   );
-    //   li.appendChild(content);
-    //   storage.appendChild(li);
-    // }
-
-    // print(i);
-
-    function onGot(item) {
-      console.log(item.valueOf());
-    }
-    
-    function onError(error) {
-      console.log(`Error: ${error}`);
-    }
-    
-    let gettingItem = browser.storage.local.get();
-    gettingItem.then(onGot, onError);
-    console.log(tab.method);
-    console.log(JSON.stringify(browser.storage.local.get()));
-
-
- }
 
 
  function externalConnections(tabs) {
@@ -176,6 +124,155 @@ function showTabInfo(tabs) {
         console.log(document.links[i].href);
     }
  }
+
+
+
+ 
+
+ function isSiteOnline(url,callback) {
+  // try to load favicon
+  var timer = setTimeout(function(){
+      // timeout after 5 seconds
+      callback(false);
+  },5000)
+
+  var img = document.createElement("img");
+  img.onload = function() {
+      clearTimeout(timer);
+      callback(true);
+  }
+
+  img.onerror = function() {
+      clearTimeout(timer);
+      callback(false);
+  }
+
+  img.src = url+"/favicon.ico";
+}
+
+function check(tabs){
+  tab=tabs.pop();
+  isSiteOnline(tab.url,function(found){
+    if(found) {
+        console.log("oi");
+    }
+    else {
+      console.log("oi");
+    }
+})
+}
+
+ 
+async function localStorageInfo(tabs){
+
+    let tab = tabs.pop();
+    var storageSize = 0;
+    console.log("id: "+JSON.stringify(tab.id))
+    const response = await browser.tabs.sendMessage(tab.id, {method: "localStorageData"})
+    if (response.data.length > 0) {
+      var ul = document.getElementById('local-content');
+      for (let item of response.data) {
+        if (item != undefined) {
+          console.log (item);
+          storageSize++;
+          var li = document.createElement("li");
+          let storage_data = document.createTextNode(item);   
+          li.appendChild(storage_data);
+          ul.appendChild(li);
+        }
+
+      }
+      var ul = document.getElementById('local-stats');
+      let storage_count = document.createTextNode("Local Storage size: " + storageSize + "\n");  
+      ul.appendChild(storage_count); 
+    }else{
+      var ul = document.getElementById('local-content');
+      var li = document.createElement("li");
+      let storage_data = document.createTextNode("Local Storage not detected");  
+      li.appendChild(storage_data);
+      ul.appendChild(li); 
+    }
+
+    console.log(storageSize)
+
+  }
+
+
+  async function sessionStorageInfo(tabs){
+
+    let tab = tabs.pop();
+    var storageSize = 0;
+    console.log("id: "+JSON.stringify(tab.id))
+    const response = await browser.tabs.sendMessage(tab.id, {method: "sessionStorageData"})
+    if (response.data.length > 0) {
+      var ul = document.getElementById('session-content');
+      for (let item of response.data) {
+        if (item != undefined) {
+          console.log (item);
+          storageSize++;
+          var li = document.createElement("li");
+          let storage_data = document.createTextNode(item);   
+          li.appendChild(storage_data);
+          ul.appendChild(li);
+        }
+      }
+      var ul = document.getElementById('session-stats');
+      let storage_count = document.createTextNode("Session Storage size: " + storageSize + "\n");  
+      ul.appendChild(storage_count); 
+    }else{
+      var ul = document.getElementById('session-content');
+      var li = document.createElement("li");
+      let storage_data = document.createTextNode("Session Storage not detected");  
+      li.appendChild(storage_data);
+      ul.appendChild(li); 
+    }
+
+    console.log(storageSize)
+
+  }
+
+
+
+  
+  async function externalConnections(tabs){
+
+    let tab = tabs.pop();
+    var storageSize = 0;
+    console.log("id: "+JSON.stringify(tab.id))
+    const response = await browser.tabs.sendMessage(tab.id, {method: "thirdPartyDomains"})
+    if (response.data.length > 0) {
+      var ul = document.getElementById('external-content');
+      for (let item of response.data) {
+        if (item != undefined) {
+          console.log (item);
+          storageSize++;
+          var li = document.createElement("li");
+          let storage_data = document.createTextNode(item);   
+          li.appendChild(storage_data);
+          ul.appendChild(li);
+        }
+      }
+      var ul = document.getElementById('external-stats');
+      let storage_count = document.createTextNode("Session Storage size: " + storageSize + "\n");  
+      ul.appendChild(storage_count); 
+    }else{
+      var ul = document.getElementById('external-content');
+      var li = document.createElement("li");
+      let storage_data = document.createTextNode("External Connections not detected");  
+      li.appendChild(storage_data);
+      ul.appendChild(li); 
+    }
+
+    console.log(storageSize)
+
+  }
+
+
+
+
+
+
+
 
 // https://www.geeksforgeeks.org/how-to-set-get-the-value-of-progress-bar-using-javascript/
  function setScoreBar(risk_score) {
@@ -192,4 +289,16 @@ function showTabInfo(tabs) {
   function getActiveTab() {
     return browser.tabs.query({currentWindow: true, active: true});
   }
+
   getActiveTab().then(showTabInfo)
+  getActiveTab().then(localStorageInfo)
+  getActiveTab().then(sessionStorageInfo)
+  getActiveTab().then(externalConnections)
+  
+
+
+// Referências
+// Cookies: 
+// https://github.com/mdn/webextensions-examples/blob/master/list-cookies/cookies.js
+// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/sendMessage
+// https://stackoverflow.com/questions/52817893/unable-to-receive-message-on-tab-from-background-script
