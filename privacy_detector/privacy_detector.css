@@ -3,9 +3,8 @@
  body, html {
   width: 500px;
   
-  background-image: url("background/img5.jpg");
+  background-image: url("background/img4.jpg");
   /* 5, 12, 13 */ 
-
 }
 
 
@@ -21,13 +20,13 @@
 
   
   .panel {
-    padding: 5px;
+    padding: 4px;
     
 
   }
   
   li {
-    margin-bottom: 5px;
+    margin-bottom: 8px;
   }
 
 
@@ -65,7 +64,7 @@
   }
 
   #myProgress{
-    background: rgb(224, 244, 250);;
+    background: rgb(177, 177, 177);;
     padding: 20px;
 
     margin-top: 10px;
@@ -73,39 +72,40 @@
     margin-right: 145px; */
   }
 
-  .box{
-    
-    list-style: inside;
-    background: rgb(224, 244, 250);;
-    padding: 20px;
-  }
 
   .box {
-    
+    list-style: inside;
+    background: rgb(224, 244, 250);;
+    padding: 12px;
     font-size: medium;
+    margin-bottom: -10px;
   }
 
   .box li {
     background: #ffe5e5;
     color: darkred;
-    padding: 5px;
+    padding: 2px;
     margin-left: 35px;
     font-size: small;
+  }
+
+  #ssl-labs{
+    text-align: center;
   }
 
   .detail_box{
     font-size: small;
+    
   }
   .detail_box li{
     background: rgb(224, 244, 250);;
     color: rgb(5, 49, 59);
-    padding: 5px;
+    padding: 4px;
     margin-left: 35px;
     font-size: smaller;
+
   }
   
-
-
   .dropdown {
     position: relative;
     display: inline-block;
@@ -117,7 +117,7 @@
     background-color: #f9f9f9;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    padding: 12px 16px;
+    padding: 10px 12px;
     z-index: 1;
   }
   

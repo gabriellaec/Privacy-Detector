@@ -102,11 +102,11 @@ function showTabInfo(tabs) {
           logURL,
           {urls: ["<all_urls>"]}
         );
-        console.log(requests);
+        // console.log(requests);
 
 
     }); 
-    console.log(requests);
+    // console.log(requests);
     
 // ----------------------------------------------------------------------
 
@@ -117,11 +117,11 @@ function showTabInfo(tabs) {
  function externalConnections(tabs) {
   let tab = tabs.pop();
   var urls = [];
-  console.log(JSON.stringify(document.querySelectorAll("div")));
+  // console.log(JSON.stringify(document.querySelectorAll("div")));
   for(var i = document.links.length; i --> 0;)
     if(document.links[i].hostname === location.hostname){
         urls.push(document.links[i].href);
-        console.log(document.links[i].href);
+        // console.log(document.links[i].href);
     }
  }
 
@@ -150,33 +150,33 @@ function showTabInfo(tabs) {
   img.src = url+"/favicon.ico";
 }
 
-function check(tabs){
-  tab=tabs.pop();
-  isSiteOnline(tab.url,function(found){
-    if(found) {
-        console.log("oi");
-    }
-    else {
-      console.log("oi");
-    }
-})
-}
+// function check(tabs){
+//   tab=tabs.pop();
+//   isSiteOnline(tab.url,function(found){
+//     if(found) {
+//         console.log("oi");
+//     }
+//     else {
+//       console.log("oi");
+//     }
+// })
+// }
 
  
 async function localStorageInfo(tabs){
 
     let tab = tabs.pop();
     var storageSize = 0;
-    console.log("id: "+JSON.stringify(tab.id))
+    // console.log("id: "+JSON.stringify(tab.id))
     const response = await browser.tabs.sendMessage(tab.id, {method: "localStorageData"})
     if (response.data.length > 0) {
       var ul = document.getElementById('local-content');
       for (let item of response.data) {
         if (item != undefined) {
-          console.log (item);
+          // console.log (item);
           storageSize++;
           var li = document.createElement("li");
-          let storage_data = document.createTextNode(item);   
+          let storage_data = document.createTextNode(item[0]);   
           li.appendChild(storage_data);
           ul.appendChild(li);
         }
@@ -193,7 +193,7 @@ async function localStorageInfo(tabs){
       ul.appendChild(li); 
     }
 
-    console.log(storageSize)
+    // console.log(storageSize)
 
   }
 
@@ -202,16 +202,16 @@ async function localStorageInfo(tabs){
 
     let tab = tabs.pop();
     var storageSize = 0;
-    console.log("id: "+JSON.stringify(tab.id))
+    // console.log("id: "+JSON.stringify(tab.id))
     const response = await browser.tabs.sendMessage(tab.id, {method: "sessionStorageData"})
     if (response.data.length > 0) {
       var ul = document.getElementById('session-content');
       for (let item of response.data) {
         if (item != undefined) {
-          console.log (item);
+          // console.log (item);
           storageSize++;
           var li = document.createElement("li");
-          let storage_data = document.createTextNode(item);   
+          let storage_data = document.createTextNode(item[0]);   
           li.appendChild(storage_data);
           ul.appendChild(li);
         }
@@ -227,7 +227,7 @@ async function localStorageInfo(tabs){
       ul.appendChild(li); 
     }
 
-    console.log(storageSize)
+    // console.log(storageSize)
 
   }
 
@@ -238,13 +238,13 @@ async function localStorageInfo(tabs){
 
     let tab = tabs.pop();
     var storageSize = 0;
-    console.log("id: "+JSON.stringify(tab.id))
+    // console.log("id: "+JSON.stringify(tab.id))
     const response = await browser.tabs.sendMessage(tab.id, {method: "thirdPartyDomains"})
     if (response.data.length > 0) {
       var ul = document.getElementById('external-content');
       for (let item of response.data) {
         if (item != undefined) {
-          console.log (item);
+          // console.log (item);
           storageSize++;
           var li = document.createElement("li");
           let storage_data = document.createTextNode(item);   
@@ -263,18 +263,48 @@ async function localStorageInfo(tabs){
       ul.appendChild(li); 
     }
 
-    console.log(storageSize)
+    // console.log(storageSize)
 
   }
 
 
+// --------------------- SSL LABS ------------------ //
+
+  function httpGet(theUrl)
+  {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
+  }
+
   async function getSSL(tabs){
-  let tab = tabs.pop()
-  console.log(tab.url)
-  const Url =  'https://api.ssllabs.com/api/v2/analyze/?host=' + tab.utl;
-  fetch(Url)
-  .then(data=> {return data.json})
-  .then(res=> {console.log(res)})
+    let tab = tabs.pop()
+    console.log(tab.url)
+    const Url =  String('https://api.ssllabs.com/api/v2/analyze/?host=' + tab.url);
+    console.log(Url)
+
+    var response = httpGet(Url)
+    console.log ((response.body))
+    console.log (JSON.parse(response).endpoints[0].grade)
+    console.log (String(JSON.parse(response).endpoints[0].grade).length )
+    var grade = JSON.parse(response).endpoints[0].grade;
+
+    if (String(grade).length <=2){  // se tiver encontrado alguma nota
+    var ul = document.getElementById('ssl-labs');
+    let ssl_rating = document.createTextNode("SSL Rating: " + grade + "\n");  
+    ul.appendChild(ssl_rating); 
+    if (grade.includes("A")){
+      ul.style.backgroundColor = "green";
+    }
+    else if (grade.includes("B")){
+      ul.style.backgroundColor = "gold";
+    }
+    else{
+      ul.style.backgroundColor = "red";
+    }
+    
+  }
 
   }
 
