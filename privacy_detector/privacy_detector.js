@@ -2,23 +2,13 @@
 // ---------------------- Privacy Detector ---------------------- //
 // --------------------------------------------------------------//
 
-
-requests = [];
-
-function logURL(tab) {
-  // console.log(tab.url);
-  // count +=1;
-  // console.log(count);
-  requests.push(tab.url);
-  // return requests;
-}
+var cookieScore = 0;
 
 function showTabInfo(tabs) {
     let tab = tabs.pop();
 
     var risk_score =0;
 
-  
 // -------------- Cookies -------------- //
     var gettingAllCookies = browser.cookies.getAll({url: tab.url});
     gettingAllCookies.then((cookies) => {
@@ -84,85 +74,57 @@ function showTabInfo(tabs) {
       }
 
       risk_score+=2*persistent_cookies;
-      risk_score+=2*session_cookies;
+      risk_score+=session_cookies;
+
+      window["cookieScore"] = risk_score
+
+      console.log("dentro: "+ window.cookieScore);
 
           
         // -------------- Score -------------- //
+
+        const localStorageNNum = document.getElementById("local-content").childElementCount;
+        console.log(localStorageNNum)
+
+        const sessionStorageNNum = document.getElementById("session-content").childElementCount;
+        console.log(sessionStorageNNum)
+
+        const externalLinksNum = document.getElementById("external-content".childElementCount);
+        console.log(externalLinksNum)
+
+        var total_score = 0.25*risk_score + 0.15*sessionStorageNNum + 0.3*externalLinksNum + 0.3* localStorageNNum;  // critérios mais críticos têm maior valor
+
+        // Se tiver algum número muito alto, soma no score total
+        if (risk_score > 30) total_score +=10;
+
+        if (localStorageNNum > 10) total_score +=10;
+
+        if (total_score > 100)total_score=100;
+
         var g = document.createElement("progress");
-        g.setAttribute("value", risk_score.toString());
+        g.setAttribute("value", total_score.toString());
         g.setAttribute("max", "100");
 
-        let content = document.createTextNode(risk_score.toString()+"   ");
+        let content = document.createTextNode(total_score.toString()+"   ");
         document.getElementById("Bar").appendChild(content);
         document.getElementById("Bar").appendChild(g);
 
-// ---------------------------------------------------------- //
-      var count = 0;
-      var gettingRequests = browser.webRequest.onBeforeRequest.addListener(
-          logURL,
-          {urls: ["<all_urls>"]}
-        );
-        // console.log(requests);
+        console.log("-----------------------------------------\nlength : ")
+        
+        
 
+       ;
 
-    }); 
-    // console.log(requests);
+    });
+      
     
-// ----------------------------------------------------------------------
+    
 
 
   }
 
 
- function externalConnections(tabs) {
-  let tab = tabs.pop();
-  var urls = [];
-  // console.log(JSON.stringify(document.querySelectorAll("div")));
-  for(var i = document.links.length; i --> 0;)
-    if(document.links[i].hostname === location.hostname){
-        urls.push(document.links[i].href);
-        // console.log(document.links[i].href);
-    }
- }
-
-
-
- 
-
- function isSiteOnline(url,callback) {
-  // try to load favicon
-  var timer = setTimeout(function(){
-      // timeout after 5 seconds
-      callback(false);
-  },5000)
-
-  var img = document.createElement("img");
-  img.onload = function() {
-      clearTimeout(timer);
-      callback(true);
-  }
-
-  img.onerror = function() {
-      clearTimeout(timer);
-      callback(false);
-  }
-
-  img.src = url+"/favicon.ico";
-}
-
-// function check(tabs){
-//   tab=tabs.pop();
-//   isSiteOnline(tab.url,function(found){
-//     if(found) {
-//         console.log("oi");
-//     }
-//     else {
-//       console.log("oi");
-//     }
-// })
-// }
-
- 
+// ------------------- Storage ----------------------- //
 async function localStorageInfo(tabs){
 
     let tab = tabs.pop();
@@ -227,13 +189,12 @@ async function localStorageInfo(tabs){
       ul.appendChild(li); 
     }
 
-    // console.log(storageSize)
-
   }
 
 
 
-  
+   // ------------------- External Connections ----------------------- //
+
   async function externalConnections(tabs){
 
     let tab = tabs.pop();
@@ -268,8 +229,7 @@ async function localStorageInfo(tabs){
   }
 
 
-// --------------------- SSL LABS ------------------ //
-
+// --------------------- SSL LABS SCORE ------------------ //
   function httpGet(theUrl)
   {
       var xmlHttp = new XMLHttpRequest();
@@ -281,13 +241,13 @@ async function localStorageInfo(tabs){
   async function getSSL(tabs){
     let tab = tabs.pop()
     console.log(tab.url)
-    const Url =  String('https://api.ssllabs.com/api/v2/analyze/?host=' + tab.url);
+    const Url =  String('https://api.ssllabs.com/api/v2/analyze/?host=' + tab.url + '&all=on');
     console.log(Url)
 
     var response = httpGet(Url)
-    console.log ((response.body))
-    console.log (JSON.parse(response).endpoints[0].grade)
-    console.log (String(JSON.parse(response).endpoints[0].grade).length )
+    console.log ((response))
+    console.log ("----------\n"+ JSON.stringify(JSON.parse(response).endpoints[0].details.cert).length)//JSON.parse(response).endpoints)
+    // console.log (String(JSON.parse(response).endpoints[0]) )
     var grade = JSON.parse(response).endpoints[0].grade;
 
     if (String(grade).length <=2){  // se tiver encontrado alguma nota
@@ -308,13 +268,10 @@ async function localStorageInfo(tabs){
 
   }
 
+// --------------------- Score bar ------------------ //
 
-
-
-
-
-// https://www.geeksforgeeks.org/how-to-set-get-the-value-of-progress-bar-using-javascript/
  function setScoreBar(risk_score) {
+
   
   var g = document.createElement("progress");
   g.setAttribute("value", risk_score.toString());
@@ -324,21 +281,26 @@ async function localStorageInfo(tabs){
   document.getElementById("Bar").appendChild(content);
   document.getElementById("Bar").appendChild(g);
 } 
+
   
+// --------------------- Function Calls ------------------ //
+
   function getActiveTab() {
     return browser.tabs.query({currentWindow: true, active: true});
   }
-
   getActiveTab().then(showTabInfo)
+
   getActiveTab().then(localStorageInfo)
   getActiveTab().then(sessionStorageInfo)
   getActiveTab().then(externalConnections)
   getActiveTab().then(getSSL)
+
   
 
-
+.then(console.log("fora "+window.cookieScore))
 // Referências
 // Cookies: 
 // https://github.com/mdn/webextensions-examples/blob/master/list-cookies/cookies.js
 // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/sendMessage
 // https://stackoverflow.com/questions/52817893/unable-to-receive-message-on-tab-from-background-script
+// https://www.geeksforgeeks.org/how-to-set-get-the-value-of-progress-bar-using-javascript/
