@@ -268,6 +268,15 @@ async function localStorageInfo(tabs){
   }
 
 
+  async function getSSL(tabs){
+  let tab = tabs.pop()
+  console.log(tab.url)
+  const Url =  'https://api.ssllabs.com/api/v2/analyze/?host=' + tab.utl;
+  fetch(Url)
+  .then(data=> {return data.json})
+  .then(res=> {console.log(res)})
+
+  }
 
 
 
@@ -294,6 +303,7 @@ async function localStorageInfo(tabs){
   getActiveTab().then(localStorageInfo)
   getActiveTab().then(sessionStorageInfo)
   getActiveTab().then(externalConnections)
+  getActiveTab().then(getSSL)
   
 
 
