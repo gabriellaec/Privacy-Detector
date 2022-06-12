@@ -2,6 +2,9 @@
 
 Extensão do Firefox que detecta possíveis ameaças à privacidade
 
+## Para usar
+1. No navegador no firefox, acessar **about:debugging#/runtime/this-firefox**
+2. Clicar em __Load Temporary Add-on__ e selecionar o arquivo __manifest.json__ deste repositório
 
 ## Features implementadas
 - Detecção e classificação de cookies 
