@@ -178,7 +178,7 @@ async function localStorageInfo(tabs){
     if (response.data.length > 0) {
       var ul = document.getElementById('external-content');
       for (let item of response.data) {
-        if (item != undefined) {
+        if (item != undefined && item !== null && item.length >0 ) {
           numConnections++;
           var li = document.createElement("li");
           let data = document.createTextNode(item);
