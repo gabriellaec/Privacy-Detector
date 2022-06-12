@@ -101,7 +101,9 @@ function showTabInfo(tabs) {
 
         if (total_score > 100)total_score=100;
 
+        
         var g = document.createElement("progress");
+        
         g.setAttribute("value", total_score.toString());
         g.setAttribute("max", "100");
 
@@ -268,16 +270,38 @@ async function localStorageInfo(tabs){
 
   }
 
+
+// --------------------- CSP Header ------------------ //
+  async function getCert(tabs){
+    let tab = tabs.pop()
+    fetch(tab.url)
+    .then(resp => {
+      const csp = resp.headers.get('Content-Security-Policy');
+      var ul = document.getElementById('cert');
+      var li = document.createElement("li");
+      let storage_data = document.createTextNode("Content Security Policy is Active");
+      let description = document.createTextNode("Helps prevent XSS attacks");    
+      li.appendChild(description);
+      ul.appendChild(storage_data); 
+
+      var ul = document.getElementById('cert-details');
+      ul.appendChild(li); 
+    });
+    
+    
+  }
+
+
 // --------------------- Score bar ------------------ //
 
- function setScoreBar(risk_score) {
+ function setScoreBar(total_score) {
 
   
   var g = document.createElement("progress");
-  g.setAttribute("value", risk_score.toString());
+  g.setAttribute("value", total_score.toString());
   g.setAttribute("max", "100");
   
-  let content = document.createTextNode(risk_score.toString()+"   ");
+  let content = document.createTextNode(total_score.toString()+"   ");
   document.getElementById("Bar").appendChild(content);
   document.getElementById("Bar").appendChild(g);
 } 
@@ -288,12 +312,14 @@ async function localStorageInfo(tabs){
   function getActiveTab() {
     return browser.tabs.query({currentWindow: true, active: true});
   }
-  getActiveTab().then(showTabInfo)
 
   getActiveTab().then(localStorageInfo)
   getActiveTab().then(sessionStorageInfo)
   getActiveTab().then(externalConnections)
   getActiveTab().then(getSSL)
+  getActiveTab().then(getCert)
+  getActiveTab().then(showTabInfo)
+
 
   
 
