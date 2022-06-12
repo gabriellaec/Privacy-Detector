@@ -277,15 +277,29 @@ async function localStorageInfo(tabs){
     fetch(tab.url)
     .then(resp => {
       const csp = resp.headers.get('Content-Security-Policy');
-      var ul = document.getElementById('cert');
-      var li = document.createElement("li");
-      let storage_data = document.createTextNode("Content Security Policy is Active");
-      let description = document.createTextNode("Helps prevent XSS attacks");    
-      li.appendChild(description);
-      ul.appendChild(storage_data); 
 
-      var ul = document.getElementById('cert-details');
-      ul.appendChild(li); 
+      console.log("Cert"+ csp)
+
+      if (csp != null){
+        var ul = document.getElementById('cert');
+        var li = document.createElement("li");
+        let storage_data = document.createTextNode("Content Security Policy is Active");
+        let description = document.createTextNode("Helps prevent XSS attacks");    
+        li.appendChild(description);
+        ul.appendChild(storage_data); 
+
+        var ul = document.getElementById('cert-details');
+        ul.appendChild(li); 
+      }else{
+        var ul = document.getElementById('cert');
+        var li = document.createElement("li");
+        let storage_data = document.createTextNode("Content Security Policy not detected");
+        let description = document.createTextNode("Website may be vulnerable to XSS attacks");    
+        li.appendChild(description);
+        ul.appendChild(storage_data); 
+        var ul = document.getElementById('cert-details');
+        ul.appendChild(li); 
+      }
     });
     
     
