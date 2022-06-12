@@ -169,34 +169,47 @@ async function localStorageInfo(tabs){
 
    // ------------------- External Connections ----------------------- //
 
-  async function externalConnections(tabs){
+  async function externalConnectionsInfo(tabs){
 
     let tab = tabs.pop();
-    var storageSize = 0;
-    const response = await browser.tabs.sendMessage(tab.id, {method: "thirdPartyDomains"})
+    var numConnections = 0; 
+    const response = await browser.tabs.sendMessage(tab.id, {method: "externalConnectionsData"})
+ 
     if (response.data.length > 0) {
       var ul = document.getElementById('external-content');
       for (let item of response.data) {
         if (item != undefined) {
-          storageSize++;
+          numConnections++;
           var li = document.createElement("li");
-          let storage_data = document.createTextNode(item);   
-          li.appendChild(storage_data);
-          ul.appendChild(li);
+          let data = document.createTextNode(item);
+          li.appendChild(data);
+          ul.appendChild(li);}
         }
-      }
       var ul = document.getElementById('external-stats');
-      let storage_count = document.createTextNode("Session Storage size: " + storageSize + "\n");  
-      ul.appendChild(storage_count); 
+      let countConnections = document.createTextNode("External Connections found: " + numConnections + "\n");
+      ul.appendChild(countConnections);
     }else{
-      var ul = document.getElementById('external-content');
-      var li = document.createElement("li");
-      let storage_data = document.createTextNode("External Connections not detected");  
-      li.appendChild(storage_data);
-      ul.appendChild(li); 
+      var ul = document.getElementById('external-stats');
+      ul.innerHTML = "No external connections was found";
     }
   }
 
+  // ------------------- Canvas Fingerprint ----------------------- //
+
+  async function canvasFingerprintInfo(tabs){
+    let tab = tabs.pop();
+    const response = await browser.tabs.sendMessage(tab.id, {method: "canvasFingerprintData"})
+    if (response.data) {
+      let ul = document.getElementById('fingerprint-stats');
+      ul.innerHTML = "Canvas fingerprinting DETECTED";
+      let li = document.getElementById('fingerprint-content');
+      li.innerHTML = response.data;
+    }else{
+      var ul = document.getElementById('fingerprint-stats');
+      ul.innerHTML = "Canvas fingerprinting not detected"; 
+    }
+    
+}
 
 // --------------------- SSL LABS SCORE ------------------ //
   function httpGet(theUrl)
@@ -272,7 +285,8 @@ async function localStorageInfo(tabs){
 
   getActiveTab().then(localStorageInfo)
   getActiveTab().then(sessionStorageInfo)
-  getActiveTab().then(externalConnections)
+  getActiveTab().then(externalConnectionsInfo)
+  getActiveTab().then(canvasFingerprintInfo)
   getActiveTab().then(getSSL)
   getActiveTab().then(getCert)
   getActiveTab().then(showTabInfo)
